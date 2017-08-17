@@ -1,0 +1,22 @@
+--SET UP--
+--Recoknition only in Dublin, Oregon (us-west2) and Virgina (us-east1)
+C:\Users\leery> aws configure set default.region us-west-2
+C:\Users\leery> aws s3api create-bucket --bucket confconnect.dev.userphotos --region us-west-2 --create-bucket-configuration LocationConstraint=us-west-2
+C:\Users\leery> aws s3api create-bucket --bucket confconnect.dev.selfiematch --region us-west-2 --create-bucket-configuration LocationConstraint=us-west-2
+C:\Users\leery> aws s3 cp C:\Users\leery\Source\Repos\ConfConnect\TrainingData\UserPhotos s3://confconnect.dev.userphoto --recursive
+
+C:\Users\leery> aws rekognition create-collection --collection-id confconnect.dev
+C:\Users\leery>aws rekognition index-faces --collection-id confconnect.dev --image S3Object={Bucket=confconnect.dev.userphoto,Name=IMG_20170704_214618.jpg}
+C:\Users\leery>aws rekognition index-faces --collection-id confconnect.dev --image S3Object={Bucket=confconnect.dev.userphoto,Name="WhatsApp Image 2017-07-23 at 13.10.38.jpeg"}
+C:\Users\leery>aws rekognition index-faces --collection-id confconnect.dev --image S3Object={Bucket=confconnect.dev.userphoto,Name="WhatsApp Image 2017-07-29 at 09.41.55.jpeg"}
+C:\Users\leery>aws rekognition index-faces --collection-id confconnect.dev --image S3Object={Bucket=confconnect.dev.userphoto,Name="WhatsApp Image 2017-07-29 at 10.35.16.jpeg"}
+
+--Find faces--
+C:\Users\leery>aws s3 cp "C:\Users\leery\Source\Repos\ConfConnect\TrainingData\Selfiematches\WhatsApp Image 2017-07-29 at 10.35.17.jpeg" s3://confconnect.dev.selfiematch
+
+C:\Users\leery>aws rekognition search-faces-by-image --collection-id confconnect.dev --image S3Object={Bucket=confconnect.dev.selfiematch,Name="WhatsApp Image 2017-07-29 at 10.35.17.jpeg"} --max-faces 2 --face-match-threshold 50.0
+
+--CLEAN UP--
+C:\Users\leery>aws s3 rb s3://confconnect.dev.selfiematch --force
+C:\Users\leery>aws s3 rb s3://confconnect.dev.userphotos --force
+C:\Users\leery>aws rekognition delete-collection --collection-id confconnect.dev
