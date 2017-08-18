@@ -5,3 +5,5 @@ C:\Users\leery> aws s3api create-bucket --bucket confconnect.dev.staticweb --reg
 C:\Users\leery> aws s3api put-bucket-tagging --bucket confconnect.dev.staticweb --tagging 'TagSet=[{Key=Project,Value=ConfConnect},{Key=Env,Value=Spike}]'
 C:\Users\leery> aws s3api put-bucket-website --bucket confconnect.dev.staticweb --website-configuration file://website.configuration.json
 C:\Users\leery> aws s3api put-bucket-cors --bucket confconnect.dev.staticweb --cors-configuration file://website.cors.fullaccess.json
+C:\Users\leery> aws s3 cp index.html s3://confconnect.dev.staticweb
+C:\Users\leery> aws s3api put-object-acl --bucket confconnect.dev.staticweb --key index.html --acl "public-read"
