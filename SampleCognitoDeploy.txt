@@ -1,0 +1,7 @@
+--SET UP--
+--Recoknition only in Dublin, Oregon (us-west2) and Virgina (us-east1)
+C:\Users\leery> aws configure set default.region us-west-2
+C:\Users\leery> aws s3api create-bucket --bucket confconnect.dev.staticweb --region us-west-2 --create-bucket-configuration LocationConstraint=us-west-2
+C:\Users\leery> aws s3api put-bucket-tagging --bucket confconnect.dev.staticweb --tagging 'TagSet=[{Key=Project,Value=ConfConnect},{Key=Env,Value=Spike}]'
+C:\Users\leery> aws s3api put-bucket-website --bucket confconnect.dev.staticweb --website-configuration file://website.configuration.json
+C:\Users\leery> aws s3api put-bucket-cors --bucket confconnect.dev.staticweb --cors-configuration file://website.cors.fullaccess.json
