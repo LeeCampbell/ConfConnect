@@ -1,9 +1,64 @@
 --SET UP--
 --Recoknition only in Dublin, Oregon (us-west2) and Virgina (us-east1)
+--
+--5 concepts : 
+--  Static web site (s3 bucket as a website), 
+--  Cognito to allow Social media login and role based access
+--  User content (s3 bucket/s),
+--  Recoknition to do facial matching
+--  Lambda to execute server side code
+
+--Console user requires permission to
+--  Create policies (admin?)
+--  Create S3 buckets (s3fullaccess)
+
+
+--Create static Web Site
 C:\Users\leery> aws configure set default.region us-west-2
 C:\Users\leery> aws s3api create-bucket --bucket confconnect.dev.staticweb --region us-west-2 --create-bucket-configuration LocationConstraint=us-west-2
-C:\Users\leery> aws s3api put-bucket-tagging --bucket confconnect.dev.staticweb --tagging 'TagSet=[{Key=Project,Value=ConfConnect},{Key=Env,Value=Spike}]'
+C:\Users\leery> aws s3api put-bucket-tagging --bucket confconnect.dev.staticweb --tagging 'TagSet=[{Key=Project,Value=ConfConnect},{Key=Env,Value=Spike},{Key=ContentOwner,Value=Infrastructure}]'
 C:\Users\leery> aws s3api put-bucket-website --bucket confconnect.dev.staticweb --website-configuration file://website.configuration.json
 C:\Users\leery> aws s3api put-bucket-cors --bucket confconnect.dev.staticweb --cors-configuration file://website.cors.fullaccess.json
 C:\Users\leery> aws s3 cp index.html s3://confconnect.dev.staticweb
 C:\Users\leery> aws s3api put-object-acl --bucket confconnect.dev.staticweb --key index.html --acl "public-read"
+
+--Create User data S3 Buckets
+C:\Users\leery> aws s3api create-bucket --bucket confconnect.dev.userphotos --region us-west-2 --create-bucket-configuration LocationConstraint=us-west-2
+C:\Users\leery> aws s3api put-bucket-tagging --bucket confconnect.dev.userphotos --tagging 'TagSet=[{Key=Project,Value=ConfConnect},{Key=Env,Value=Spike},{Key=ContentOwner,Value=Users}]'
+--TODO: Tighten up the CORS access to know sites and verbs?
+C:\Users\leery> aws s3api put-bucket-cors --bucket confconnect.dev.userphotos --cors-configuration file://website.cors.fullaccess.json
+
+--IAM
+C:\Users\leery> aws iam create-policy --policy-name Save-Selfie-facebook-policy --policy-document file://facebook.policy.json
+C:\Users\leery> aws iam create-role --role-name Facebook_user_role --description "Role for facebook users to access their personal content" --assume-role-policy-document file://facebook.roleTrust.policy
+C:\Users\leery> aws iam attach-role-policy --policy-arn ??? --role-name Facebook_user_role
+
+--Create Recoknition Collections
+
+--Create Lambda
+
+--Create cognito IAM policy and roles
+
+
+--Some tests?
+
+
+
+--Clean up
+--  Congnito
+--  Policy
+--  Lambda
+--  Recoknition
+--  S3 buckets
+
+
+
+
+--TODO:
+--IAM Policy/Role/Group....?
+--No need for groups here (I think of Groups like "Mercury Devs" which can as a group have roles added and removed)
+--Create roles (anon user, logged in user, site admin)
+--Attach the correct policies to the roles
+--  Anon - public read
+--  Users - write selfie images to S3, update their rows in DynamoDB, see their matches and points/tags
+--  Admin users - add tag types, see users points and tags
