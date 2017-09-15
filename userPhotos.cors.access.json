@@ -1,0 +1,10 @@
+{
+    "CORSRules": [
+      {
+        "AllowedOrigins": ["http://confconnect.dev.staticweb.s3-website-us-west-2.amazonaws.com"],
+        "AllowedHeaders": ["*"],
+        "AllowedMethods": ["HEAD", "GET", "PUT"],
+        "ExposeHeaders": ["ETag"]
+      }
+    ]
+  }
