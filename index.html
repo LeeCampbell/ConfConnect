@@ -2,6 +2,8 @@
 <html lang="en" dir="ltr" xmlns:fb="http://ogp.me/ns/fb#">
     <head>
         <title>ConfConnect - Selfie Capture</title>
+        <meta charset="utf-8">
+        <script src="https://sdk.amazonaws.com/js/aws-sdk-2.92.0.min.js"></script>
         <style>
             video { border: 1px solid #ccc; display: block; margin: 0 0 20px 0; }
             #canvas { margin-top: 20px; border: 1px solid #ccc; display: block; }
@@ -10,18 +12,145 @@
     </head>
     <body>
 
+        <div id="LoginButtons">
+            <div class="fb-login-button" data-max-rows="1" data-size="medium" data-button-type="continue_with" data-show-faces="false" data-auto-logout-link="true" data-use-continue-as="true"></div>
+        </div>
         <video id="video" width="640" height="480" autoplay></video>
-        <button id="snap" class="sexyButton">Snap Photo</button>
-        <canvas id="canvas" width="640" height="480"></canvas>
+        <button id="snap-button" class="sexyButton">Snap Photo</button>
+        <canvas id="canvas" width="640" height="480" style="display:none"></canvas>
+        <button id="save-button" style="display:none">Use this image</button>
+        <button id="tryAgain-button" style="display:none">Try again</button>
+        <div id="results"></div>
 
-        <script>
+        <script type="text/javascript">
+            var appId = '682146731983534';
+            var roleArn = 'arn:aws:iam::017491810838:role/FaceBook_user_role';
+            var bucketName = 'confconnect.dev.userphotos';
+            AWS.config.region = 'us-west-2';
+    
+            var fbUserId;
+            var bucket = new AWS.S3({
+                params: {
+                    Bucket: bucketName
+                }
+            });
+    
+            var saveButton = document.getElementById('save-button');
+            var results = document.getElementById('results');
+    
+            saveButton.addEventListener('click', function () {
+                
 
+                var canvas = document.getElementById('canvas');
+                //https://stackoverflow.com/questions/13990673/upload-canvas-data-to-s3
+                var dataUrl = canvas.toDataURL("image/jpeg");
+                var blobData = dataURItoBlob(dataUrl);
+                var fileName = 'facebook-' + fbUserId + '/MySelfie.png';
+                var params = {Key: fileName, ContentType: "image/jpeg", Body: blobData};
+                bucket.upload(params, function (err, data) {
+                    console.log(data);
+                    console.log(err ? 'ERROR!' : 'UPLOADED.');
+                });
+
+                /*
+                No dice.
+                //https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+
+                canvas.toBlob(function(blob) {
+                    if (blob) {
+                        results.innerHTML = '';
+                        //Object key will be facebook-USERID#/FILE_NAME
+                        var objKey = 'facebook-' + fbUserId + '/MySelfie.png';
+                        var params = {
+                            Key: objKey,
+                            ContentType: 'image/png',
+                            Body: blob,
+                            ACL: 'public-read'
+                        };
+                        console.log(params);
+        
+                        bucket.putObject(params, function (err, data) {
+                            if (err) {
+                                results.innerHTML = 'ERROR: ' + err;
+                            } else {
+                                listObjs();
+                            }
+                        });
+                    } else {
+                        results.innerHTML = 'Nothing to upload.';
+                    }
+                });*/
+            }, false);
+    
+            function dataURItoBlob(dataURI) {
+                var binary = atob(dataURI.split(',')[1]);
+                var array = [];
+                for(var i = 0; i < binary.length; i++) {
+                    array.push(binary.charCodeAt(i));
+                }
+                return new Blob([new Uint8Array(array)], {type: 'image/jpeg'});
+            }
+            function listObjs() {
+                var prefix = 'facebook-' + fbUserId;
+                bucket.listObjects({
+                    Prefix: prefix
+                }, function (err, data) {
+                    if (err) {
+                        results.innerHTML = 'ERROR: ' + err;
+                    } else {
+                        var objKeys = "";
+                        data.Contents.forEach(function (obj) {
+                            objKeys += obj.Key + "<br>";
+                        });
+                        results.innerHTML = objKeys;
+                    }
+                });
+            }
+            /*!
+             * Login to your application using Facebook.
+             * Uses the Facebook SDK for JavaScript available here:
+             * https://developers.facebook.com/docs/javascript/quickstart/
+             */
+    
+            window.fbAsyncInit = function () {
+                FB.init({
+                    appId: appId,
+                    cookie     : true,  // enable cookies to allow the server to access 
+                                        // the session
+                    xfbml      : true,  // parse social plugins on this page i.e. fb-login-button
+                    version    : 'v2.8' // use graph api version 2.8
+                });
+                FB.getLoginStatus(function(response) {
+                    if (response.status === 'connected') {
+                        console.log('Logged in.');
+                        console.log(response);
+                    }
+                    else {
+                        //This would be blocked as a popup being initiated from non-user action
+                        //FB.login();
+                    }
+                });
+                FB.login(function (response) {
+                    console.log('login response');
+                    console.log(response);
+                    bucket.config.credentials = new AWS.WebIdentityCredentials({
+                        ProviderId: 'graph.facebook.com',
+                        RoleArn: roleArn,
+                        WebIdentityToken: response.authResponse.accessToken
+                    });
+                    fbUserId = response.authResponse.userID;
+                    //button.style.display = 'block';
+                })
+            };
+    
             // Put event listeners into place
             window.addEventListener("DOMContentLoaded", function() {
                 // Grab elements, create settings, etc.
                 var canvas = document.getElementById('canvas');
                 var context = canvas.getContext('2d');
                 var video = document.getElementById('video');
+                var snapButton = document.getElementById('snap-button');
+                var tryAgainButton = document.getElementById('tryAgain-button');
                 var mediaConfig =  { video: true };
                 var errBack = function(e) {
                     console.log('An error has occurred!', e)
@@ -54,11 +183,34 @@
                 }
 
                 // Trigger photo take
-                document.getElementById('snap').addEventListener('click', function() {
+                snapButton.addEventListener('click', function() {
                     context.drawImage(video, 0, 0, 640, 480);
+                    canvas.style.display = 'block';
+                    saveButton.style.display = 'block';
+                    tryAgainButton.style.display = 'block';
+                    video.style.display = 'none';
+                    snapButton.style.display = 'none';
+                });
+                tryAgainButton.addEventListener('click', function() {
+                    canvas.style.display = 'none';
+                    saveButton.style.display = 'none';
+                    tryAgainButton.style.display = 'none';
+                    video.style.display = 'block';
+                    snapButton.style.display = 'block';
                 });
             }, false);
 
+             // Load the Facebook SDK asynchronously
+            (function (d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) {
+                    return;
+                }
+                js = d.createElement(s);
+                js.id = id;
+                js.src = "https://connect.facebook.net/en_US/all.js";
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
         </script>
     </body>
 </html>

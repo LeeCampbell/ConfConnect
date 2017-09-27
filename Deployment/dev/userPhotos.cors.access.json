@@ -1,0 +1,10 @@
+{
+    "CORSRules": [
+      {
+        "AllowedOrigins": ["http://dev.selfieconnect.com.s3-website-us-west-2.amazonaws.com","https://dev.selfieconnect.com"],
+        "AllowedHeaders": ["*"],
+        "AllowedMethods": ["HEAD", "GET", "PUT"],
+        "ExposeHeaders": ["ETag"]
+      }
+    ]
+  }
