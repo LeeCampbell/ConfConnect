@@ -15,8 +15,9 @@
         <div id="LoginButtons">
             <div class="fb-login-button" data-max-rows="1" data-size="medium" data-button-type="continue_with" data-show-faces="false" data-auto-logout-link="true" data-use-continue-as="true"></div>
         </div>
-        <video id="video" width="640" height="480" autoplay></video>
-        <button id="snap-button" class="sexyButton">Snap Photo</button>
+        <img id="image" width="640" height="480" style="display:none"></img>
+        <video id="video" width="640" height="480" autoplay style="display:none"></video>
+        <button id="snap-button" class="sexyButton" style="display:none">Snap Photo</button>
         <canvas id="canvas" width="640" height="480" style="display:none"></canvas>
         <button id="save-button" style="display:none">Use this image</button>
         <button id="tryAgain-button" style="display:none">Try again</button>
@@ -26,6 +27,7 @@
             var appId = '682146731983534';
             var roleArn = 'arn:aws:iam::017491810838:role/FaceBook_user_role';
             var bucketName = 'confconnect.dev.userphotos';
+            var imageBasePath = 'https://s3-us-west-2.amazonaws.com/confconnect.dev.userphotos/';
             AWS.config.region = 'us-west-2';
     
             var fbUserId;
@@ -39,79 +41,46 @@
             var results = document.getElementById('results');
     
             saveButton.addEventListener('click', function () {
-                
-
-                var canvas = document.getElementById('canvas');
-                //https://stackoverflow.com/questions/13990673/upload-canvas-data-to-s3
-                var dataUrl = canvas.toDataURL("image/jpeg");
-                var blobData = dataURItoBlob(dataUrl);
+                var blobData = canvasToBlob('canvas');
                 var fileName = 'facebook-' + fbUserId + '/MySelfie.png';
-                var params = {Key: fileName, ContentType: "image/jpeg", Body: blobData};
+                var params = {
+                    Key: fileName, 
+                    ContentType: blobData.type, 
+                    Body: blobData,
+                    ACL: 'public-read'
+                };
                 bucket.upload(params, function (err, data) {
                     console.log(data);
-                    console.log(err ? 'ERROR!' : 'UPLOADED.');
-                });
-
-                /*
-                No dice.
-                //https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
-
-                canvas.toBlob(function(blob) {
-                    if (blob) {
-                        results.innerHTML = '';
-                        //Object key will be facebook-USERID#/FILE_NAME
-                        var objKey = 'facebook-' + fbUserId + '/MySelfie.png';
-                        var params = {
-                            Key: objKey,
-                            ContentType: 'image/png',
-                            Body: blob,
-                            ACL: 'public-read'
-                        };
-                        console.log(params);
-        
-                        bucket.putObject(params, function (err, data) {
-                            if (err) {
-                                results.innerHTML = 'ERROR: ' + err;
-                            } else {
-                                listObjs();
-                            }
-                        });
-                    } else {
-                        results.innerHTML = 'Nothing to upload.';
+                    if(err)
+                    {
+                        console.log('ERROR!');
+                    }else{
+                        console.log('Selfie uploaded!');
+                        image.src = imageBasePath + 'facebook-' + fbUserId + '/MySelfie.png';
                     }
-                });*/
+                });
             }, false);
-    
-            function dataURItoBlob(dataURI) {
+            function canvasToBlob(elementId) {
+                var contentType = 'image/jpeg';
+                var canvas = document.getElementById('canvas');
+                var dataUrl = canvas.toDataURL(contentType);
+                var bytes = dataURItoBytes(dataUrl);                
+                return new Blob([bytes], {type: contentType});
+            }
+            function dataURItoBytes(dataURI) {
                 var binary = atob(dataURI.split(',')[1]);
                 var array = [];
                 for(var i = 0; i < binary.length; i++) {
                     array.push(binary.charCodeAt(i));
                 }
-                return new Blob([new Uint8Array(array)], {type: 'image/jpeg'});
+                return new Uint8Array(array);
             }
-            function listObjs() {
-                var prefix = 'facebook-' + fbUserId;
-                bucket.listObjects({
-                    Prefix: prefix
-                }, function (err, data) {
-                    if (err) {
-                        results.innerHTML = 'ERROR: ' + err;
-                    } else {
-                        var objKeys = "";
-                        data.Contents.forEach(function (obj) {
-                            objKeys += obj.Key + "<br>";
-                        });
-                        results.innerHTML = objKeys;
-                    }
-                });
-            }
+            
             /*!
              * Login to your application using Facebook.
              * Uses the Facebook SDK for JavaScript available here:
              * https://developers.facebook.com/docs/javascript/quickstart/
              */
-    
             window.fbAsyncInit = function () {
                 FB.init({
                     appId: appId,
@@ -125,10 +94,6 @@
                         console.log('Logged in.');
                         console.log(response);
                     }
-                    else {
-                        //This would be blocked as a popup being initiated from non-user action
-                        //FB.login();
-                    }
                 });
                 FB.login(function (response) {
                     console.log('login response');
@@ -139,28 +104,22 @@
                         WebIdentityToken: response.authResponse.accessToken
                     });
                     fbUserId = response.authResponse.userID;
-                    //button.style.display = 'block';
+                    image.src = imageBasePath + 'facebook-' + fbUserId + '/MySelfie.png';
                 })
             };
-    
-            // Put event listeners into place
-            window.addEventListener("DOMContentLoaded", function() {
-                // Grab elements, create settings, etc.
-                var canvas = document.getElementById('canvas');
-                var context = canvas.getContext('2d');
-                var video = document.getElementById('video');
-                var snapButton = document.getElementById('snap-button');
-                var tryAgainButton = document.getElementById('tryAgain-button');
+
+            //If we want to chase being able to turn off the camera, then maybe make this an object with capture() and stop() methods.
+            //  else, we can just navigate away once the selfie is captured. -->POST
+            function captureCameraTo(video) {
                 var mediaConfig =  { video: true };
                 var errBack = function(e) {
                     console.log('An error has occurred!', e)
                 };
-
                 // Put video listeners into place
                 if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                     navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
                         video.src = window.URL.createObjectURL(stream);
-                        video.play();
+                        video.play();                        
                     });
                 }
 
@@ -179,25 +138,63 @@
                     navigator.mozGetUserMedia(mediaConfig, function(stream){
                         video.src = window.URL.createObjectURL(stream);
                         video.play();
+
                     }, errBack);
                 }
+            }
+
+            // Put event listeners into place
+            window.addEventListener("DOMContentLoaded", function() {
+                // Grab elements, create settings, etc.
+                var image = document.getElementById('image');
+                var canvas = document.getElementById('canvas');
+                var context = canvas.getContext('2d');
+                var video = document.getElementById('video');
+                var snapButton = document.getElementById('snap-button');
+                var tryAgainButton = document.getElementById('tryAgain-button');
+                
+                //Try to load webcam feed.
+                captureCameraTo(video);
 
                 // Trigger photo take
                 snapButton.addEventListener('click', function() {
                     context.drawImage(video, 0, 0, 640, 480);
+                    video.style.display = 'none';
+                    snapButton.style.display = 'none';
                     canvas.style.display = 'block';
                     saveButton.style.display = 'block';
                     tryAgainButton.style.display = 'block';
-                    video.style.display = 'none';
-                    snapButton.style.display = 'none';
                 });
                 tryAgainButton.addEventListener('click', function() {
                     canvas.style.display = 'none';
+                    image.style.display = 'none';
                     saveButton.style.display = 'none';
                     tryAgainButton.style.display = 'none';
                     video.style.display = 'block';
                     snapButton.style.display = 'block';
                 });
+
+                image.onload=function(){
+                    console.log('Selfie image loaded.');
+                    //hide the video and canvas
+                    video.style.display = 'none';
+                    canvas.style.display = 'none';
+                    snapButton.style.display = 'none';
+                    //Show the image
+                    image.style.display = 'block';
+                    tryAgainButton.style.display = 'block';
+                };
+                image.onerror=function(){
+                    console.log('Selfie image failed to load.');
+                    //hide the image and canvas
+                    image.style.display = 'none';
+                    canvas.style.display = 'none';
+                    tryAgainButton.style.display = 'none';
+                    //Show the video
+                    video.style.display = 'block';
+                    snapButton.style.display = 'block';
+                };
+                
             }, false);
 
              // Load the Facebook SDK asynchronously
