@@ -25,10 +25,10 @@
         <div id="results"></div>
 
         <script type="text/javascript">
-            var appId = '682146731983534';
-            var roleArn = 'arn:aws:iam::017491810838:role/FaceBook_user_role';
-            var bucketName = 'dev.userphotos.selfieconnect.com';
-            var imageBasePath = 'https://dev.userphotos.selfieconnect.com/';
+            var appId = '2124970397726229';
+            var roleArn = 'arn:aws:iam::017491810838:role/dev.selfieconnect.Facebook_user_role';
+            var bucketName = 'devuserphotos.selfieconnect.com';
+            var imageBasePath = 'https://devuserphotos.selfieconnect.com/';
             AWS.config.region = 'us-west-2';
     
             var fbUserId;
@@ -94,21 +94,25 @@
                     if (response.status === 'connected') {
                         console.log('Logged in.');
                         console.log(response);
+                        loggedIn(response.authResponse);
                     }
                 });
                 FB.login(function (response) {
                     console.log('login response');
                     console.log(response);
-                    bucket.config.credentials = new AWS.WebIdentityCredentials({
-                        ProviderId: 'graph.facebook.com',
-                        RoleArn: roleArn,
-                        WebIdentityToken: response.authResponse.accessToken
-                    });
-                    fbUserId = response.authResponse.userID;
-                    image.src = imageBasePath + 'facebook-' + fbUserId + '/MySelfie.png';
+                    loggedIn(response.authResponse);
                 })
             };
 
+            function loggedIn(authResponse){
+                bucket.config.credentials = new AWS.WebIdentityCredentials({
+                        ProviderId: 'graph.facebook.com',
+                        RoleArn: roleArn,
+                        WebIdentityToken: authResponse.accessToken
+                });
+                fbUserId = authResponse.userID;
+                image.src = imageBasePath + 'facebook-' + fbUserId + '/MySelfie.png';
+            }
             //If we want to chase being able to turn off the camera, then maybe make this an object with capture() and stop() methods.
             //  else, we can just navigate away once the selfie is captured. -->POST
             function captureCameraTo(video) {

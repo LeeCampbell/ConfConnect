@@ -1,0 +1,119 @@
+{
+    "Distribution": {
+        "Status": "InProgress",
+        "DomainName": "dhvkmou0g8lat.cloudfront.net",
+        "InProgressInvalidationBatches": 0,
+        "DistributionConfig": {
+            "Comment": "CDN for User's Selfie photos",
+            "CacheBehaviors": {
+                "Quantity": 0
+            },
+            "IsIPV6Enabled": true,
+            "Logging": {
+                "Bucket": "",
+                "Prefix": "",
+                "Enabled": false,
+                "IncludeCookies": false
+            },
+            "WebACLId": "",
+            "Origins": {
+                "Items": [
+                    {
+                        "S3OriginConfig": {
+                            "OriginAccessIdentity": ""
+                        },
+                        "OriginPath": "",
+                        "CustomHeaders": {
+                            "Quantity": 0
+                        },
+                        "Id": "S3-devuserphotos.selfieconnect.com",
+                        "DomainName": "devuserphotos.selfieconnect.com.s3.amazonaws.com"
+                    }
+                ],
+                "Quantity": 1
+            },
+            "DefaultRootObject": "",
+            "PriceClass": "PriceClass_All",
+            "Enabled": true,
+            "DefaultCacheBehavior": {
+                "TrustedSigners": {
+                    "Enabled": false,
+                    "Quantity": 0
+                },
+                "LambdaFunctionAssociations": {
+                    "Quantity": 0
+                },
+                "TargetOriginId": "S3-devuserphotos.selfieconnect.com",
+                "ViewerProtocolPolicy": "redirect-to-https",
+                "ForwardedValues": {
+                    "Headers": {
+                        "Quantity": 0
+                    },
+                    "Cookies": {
+                        "Forward": "none"
+                    },
+                    "QueryStringCacheKeys": {
+                        "Quantity": 0
+                    },
+                    "QueryString": false
+                },
+                "MaxTTL": 1,
+                "SmoothStreaming": false,
+                "DefaultTTL": 1,
+                "AllowedMethods": {
+                    "Items": [
+                        "HEAD",
+                        "DELETE",
+                        "POST",
+                        "GET",
+                        "OPTIONS",
+                        "PUT",
+                        "PATCH"
+                    ],
+                    "CachedMethods": {
+                        "Items": [
+                            "HEAD",
+                            "GET"
+                        ],
+                        "Quantity": 2
+                    },
+                    "Quantity": 7
+                },
+                "MinTTL": 0,
+                "Compress": false
+            },
+            "CallerReference": "2017-09-30T19:41",
+            "ViewerCertificate": {
+                "SSLSupportMethod": "sni-only",
+                "ACMCertificateArn": "arn:aws:acm:us-east-1:017491810838:certificate/b9e0923d-ca48-4e9a-b7a2-361515401e01",
+                "MinimumProtocolVersion": "TLSv1.1_2016",
+                "Certificate": "arn:aws:acm:us-east-1:017491810838:certificate/b9e0923d-ca48-4e9a-b7a2-361515401e01",
+                "CertificateSource": "acm"
+            },
+            "CustomErrorResponses": {
+                "Quantity": 0
+            },
+            "HttpVersion": "http2",
+            "Restrictions": {
+                "GeoRestriction": {
+                    "RestrictionType": "none",
+                    "Quantity": 0
+                }
+            },
+            "Aliases": {
+                "Items": [
+                    "devuserphotos.selfieconnect.com"
+                ],
+                "Quantity": 1
+            }
+        },
+        "ActiveTrustedSigners": {
+            "Enabled": false,
+            "Quantity": 0
+        },
+        "LastModifiedTime": "2017-09-30T13:43:13.309Z",
+        "Id": "E3R1R9N6UK31N9",
+        "ARN": "arn:aws:cloudfront::017491810838:distribution/E3R1R9N6UK31N9"
+    },
+    "ETag": "E2Y1U6P2BSQX1S"
+}

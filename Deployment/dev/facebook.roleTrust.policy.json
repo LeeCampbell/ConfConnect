@@ -9,7 +9,7 @@
       },
       "Condition": {
         "StringEquals": {
-          "graph.facebook.com:app_id": "682146731983534"
+          "graph.facebook.com:app_id": "2124970397726229"
         }
       }
     }

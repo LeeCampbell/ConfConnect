@@ -12,27 +12,30 @@
 --  Create policies (admin?)
 --  Create S3 buckets (s3fullaccess)
 
+staticWeb = dev.selfieconnect.com
+userPhotos = devuserphotos.selfieconnect.com
+FbAppId = 2124970397726229
 
---Create static Web Site
+
+--Create static Web Site (CloudFront and Route53 already set up)
 C:\Users\leery> aws configure set default.region us-west-2
-C:\Users\leery> aws s3api create-bucket --bucket confconnect.dev.staticweb --region us-west-2 --create-bucket-configuration LocationConstraint=us-west-2
-C:\Users\leery> aws s3api put-bucket-tagging --bucket confconnect.dev.staticweb --tagging 'TagSet=[{Key=Project,Value=ConfConnect},{Key=Env,Value=Spike},{Key=ContentOwner,Value=Infrastructure}]'
-C:\Users\leery> aws s3api put-bucket-website --bucket confconnect.dev.staticweb --website-configuration file://website.configuration.json
-C:\Users\leery> aws s3 cp index.html s3://confconnect.dev.staticweb
-C:\Users\leery> aws s3api put-object-acl --bucket confconnect.dev.staticweb --key index.html --acl "public-read"
-C:\Users\leery> aws s3 cp FBUploadSample.html s3://confconnect.dev.staticweb
-C:\Users\leery> aws s3api put-object-acl --bucket confconnect.dev.staticweb --key FBUploadSample.html --acl "public-read"
--- currently http://confconnect.dev.staticweb.s3-website-us-west-2.amazonaws.com/FBUploadSample.html
+C:\Users\leery> aws s3api create-bucket --bucket dev.selfieconnect.com --region us-west-2 --create-bucket-configuration LocationConstraint=us-west-2
+C:\Users\leery> aws s3api put-bucket-tagging --bucket dev.selfieconnect.com --tagging 'TagSet=[{Key=Project,Value=ConfConnect},{Key=Env,Value=Spike},{Key=ContentOwner,Value=Infrastructure}]'
+C:\Users\leery> aws s3api put-bucket-website --bucket dev.selfieconnect.com --website-configuration file://website.configuration.json
+--TODO: string replace XXX? with dev.selfieconnect.com
+C:\Users\leery> aws s3 cp .\index.html s3://dev.selfieconnect.com
+C:\Users\leery> aws s3api put-object-acl --bucket dev.selfieconnect.com --key index.html --acl "public-read"
 
 --Create User data S3 Buckets
-C:\Users\leery> aws s3api create-bucket --bucket confconnect.dev.userphotos --region us-west-2 --create-bucket-configuration LocationConstraint=us-west-2
-C:\Users\leery> aws s3api put-bucket-tagging --bucket confconnect.dev.userphotos --tagging 'TagSet=[{Key=Project,Value=ConfConnect},{Key=Env,Value=Spike},{Key=ContentOwner,Value=Users}]'
-C:\Users\leery> aws s3api put-bucket-cors --bucket confconnect.dev.userphotos --cors-configuration file://userPhotos.cors.access.json
+C:\Users\leery> aws s3api create-bucket --bucket devuserphotos.selfieconnect.com --region us-west-2 --create-bucket-configuration LocationConstraint=us-west-2
+C:\Users\leery> aws s3api put-bucket-tagging --bucket devuserphotos.selfieconnect.com --tagging 'TagSet=[{Key=Project,Value=ConfConnect},{Key=Env,Value=Spike},{Key=ContentOwner,Value=Users}]'
+C:\Users\leery> aws s3api put-bucket-cors --bucket devuserphotos.selfieconnect.com --cors-configuration file://userPhotos.cors.access.json
 
 --IAM
-C:\Users\leery> aws iam create-policy --policy-name Save-Selfie-facebook-policy --policy-document file://facebook.policy.json
-C:\Users\leery> aws iam create-role --role-name Facebook_user_role --description "Role for facebook users to access their personal content" --assume-role-policy-document file://facebook.roleTrust.policy
-C:\Users\leery> aws iam attach-role-policy --policy-arn arn:aws:iam::017491810838:policy/Save-Selfie-facebook-policy --role-name Facebook_user_role
+C:\Users\leery> aws iam create-policy --policy-name dev.selfieconnect.SaveSelfie-facebook-policy --policy-document file://facebook.policy.json
+C:\Users\leery> aws iam create-role --role-name dev.selfieconnect.Facebook_user_role --description "Role for facebook users to access their personal content" --assume-role-policy-document file://facebook.roleTrust.policy.json
+--TODO: Get the actual policyarn that was created....which actually needs to happen before the index.html is uploaded as it needs to be in there.
+C:\Users\leery> aws iam attach-role-policy --policy-arn arn:aws:iam::017491810838:policy/dev.selfieconnect.SaveSelfie-facebook-policy --role-name dev.selfieconnect.Facebook_user_role
 
 --Create Recoknition Collections
 

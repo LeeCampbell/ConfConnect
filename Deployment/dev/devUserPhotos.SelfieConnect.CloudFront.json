@@ -1,0 +1,94 @@
+
+  {
+    "CallerReference": "2017-09-30T19:41",
+    "Aliases": {
+      "Quantity": 1,
+      "Items": ["devuserphotos.selfieconnect.com"]
+    },
+    "DefaultRootObject": "",
+    "Origins": {
+      "Quantity": 1,
+      "Items": [
+        {
+          "Id": "S3-devuserphotos.selfieconnect.com",
+          "DomainName": "devuserphotos.selfieconnect.com.s3.amazonaws.com",
+          "OriginPath": "",
+          "CustomHeaders": {
+            "Quantity": 0
+          },
+          "S3OriginConfig": {
+            "OriginAccessIdentity": ""
+          }
+        }
+      ]
+    },
+    "DefaultCacheBehavior": {
+      "TargetOriginId": "S3-devuserphotos.selfieconnect.com",
+      "ForwardedValues": {
+        "QueryString": false,
+        "Cookies": {
+          "Forward": "none"
+        },
+        "Headers": {
+          "Quantity": 0
+        },
+        "QueryStringCacheKeys": {
+          "Quantity": 0
+        }
+      },
+      "TrustedSigners": {
+        "Enabled": false,
+        "Quantity": 0
+      },
+      "ViewerProtocolPolicy": "redirect-to-https",
+      "MinTTL": 0,
+      "AllowedMethods": {
+        "Quantity": 7,
+        "Items": ["GET","HEAD","POST","PUT","PATCH","OPTIONS","DELETE"],
+        "CachedMethods": {
+          "Quantity": 2,
+          "Items": ["GET","HEAD"]
+        }
+      },
+      "SmoothStreaming": false,
+      "DefaultTTL": 1,
+      "MaxTTL": 1,
+      "Compress": false,
+      "LambdaFunctionAssociations": {
+        "Quantity": 0
+      }
+    },
+    "CacheBehaviors": {
+      "Quantity": 0
+    },
+	
+    "CustomErrorResponses": {
+      "Quantity": 0
+    },
+    "Comment": "CDN for User's Selfie photos",
+    "Logging": {
+      "Enabled": false,
+      "IncludeCookies": false,
+      "Bucket": "",
+      "Prefix": ""
+    },
+    "PriceClass": "PriceClass_All",
+    "Enabled": true,
+    "ViewerCertificate": {
+      "CloudFrontDefaultCertificate": false,
+      "ACMCertificateArn": "arn:aws:acm:us-east-1:017491810838:certificate/b9e0923d-ca48-4e9a-b7a2-361515401e01",
+      "SSLSupportMethod": "sni-only",
+      "MinimumProtocolVersion": "TLSv1.1_2016",
+      "Certificate": "arn:aws:acm:us-east-1:017491810838:certificate/b9e0923d-ca48-4e9a-b7a2-361515401e01",
+      "CertificateSource": "acm"
+    },
+    "Restrictions": {
+      "GeoRestriction": {
+        "RestrictionType": "none",
+        "Quantity": 0
+      }
+    },
+    "WebACLId": "",
+    "HttpVersion": "http2",
+    "IsIPV6Enabled": true
+  }

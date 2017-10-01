@@ -7,16 +7,25 @@
              "s3:PutObjectAcl"
           ],
           "Resource": [
-              "arn:aws:s3:::dev.selfieconnect.userphotos/facebook-${graph.facebook.com:id}/*"
+              "arn:aws:s3:::devuserphotos.selfieconnect.com/facebook-${graph.facebook.com:id}/*"
           ],
           "Effect": "Allow"
+       },
+       {
+           "Action": [
+              "s3:GetObject"
+           ],
+           "Resource": [
+              "arn:aws:s3:::devuserphotos.selfieconnect.com/facebook-${graph.facebook.com:id}/*"
+           ],
+           "Effect": "Allow"
        },
        {
           "Action": [
              "s3:ListBucket"
           ],
           "Resource": [
-             "arn:aws:s3:::dev.selfieconnect.userphotos"
+             "arn:aws:s3:::devuserphotos.selfieconnect.com"
           ],
           "Effect": "Allow",
           "Condition": {
